@@ -15,7 +15,7 @@ describe('AuthService', () => {
             get: (key: string) => {
               const values: Record<string, string> = {
                 KEYCLOAK_URL: 'http://localhost:8080',
-                KEYCLOAK_REALM: 'master',
+                KEYCLOAK_REALM: 'ediary',
                 KEYCLOAK_CLIENT_ID: 'e-diary-backend',
               };
               return values[key];

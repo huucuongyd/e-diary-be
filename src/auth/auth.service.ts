@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   private get realm(): string {
-    return this.config.get<string>('KEYCLOAK_REALM') ?? 'master';
+    return this.config.get<string>('KEYCLOAK_REALM') ?? 'ediary';
   }
 
   private get publicKey(): string {
