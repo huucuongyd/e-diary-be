@@ -3,12 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import * as jwt from 'jsonwebtoken';
+import { Payload } from './interfaces/payload.interface';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly config: ConfigService) {}
 
-  verifyAccessToken(token: string): jwt.JwtPayload {
+  verifyAccessToken(token: string): Payload {
     try {
       const payload = jwt.verify(token, this.publicKey, {
         algorithms: ['RS256'],
@@ -19,7 +20,13 @@ export class AuthService {
         throw new UnauthorizedException('Invalid access token');
       }
 
-      return payload;
+      return {
+        sub: payload.sub,
+        email: payload.email,
+        username: payload.username,
+        iat: payload.iat,
+        exp: payload.exp,
+      } as Payload;
     } catch {
       throw new UnauthorizedException('Invalid access token');
     }

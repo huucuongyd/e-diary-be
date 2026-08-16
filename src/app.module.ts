@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DiaryModule } from './diary/diary.module';
+import { RedisModule } from './redis/redis.module';
 import { StorageModule } from './storage/storage.module';
 import { UserModule } from './user/user.module';
 
@@ -28,6 +29,7 @@ import { UserModule } from './user/user.module';
       }),
     }),
     StorageModule,
+    RedisModule,
     AuthModule,
     UserModule,
     DiaryModule,
