@@ -17,7 +17,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs -d src/data-source.ts",
+    "migration:generate": "npm run typeorm -- migration:generate",
+    "migration:create": "npm run typeorm -- migration:create",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1111.0",
@@ -28,6 +33,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.4.6",
     "@nestjs/typeorm": "^11.0.3",
+    "class-validator": "^0.15.1",
     "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",

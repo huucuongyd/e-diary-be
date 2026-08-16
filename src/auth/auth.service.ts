@@ -4,12 +4,18 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import * as jwt from 'jsonwebtoken';
 import { Payload } from './interfaces/payload.interface';
+import { RedisService } from '../redis/redis.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly redisService: RedisService,
+    private readonly userService: UserService
+  ) {}
 
-  verifyAccessToken(token: string): Payload {
+  async verifyAccessToken(token: string): Promise<Payload> {
     try {
       const payload = jwt.verify(token, this.publicKey, {
         algorithms: ['RS256'],
@@ -18,6 +24,19 @@ export class AuthService {
 
       if (typeof payload === 'string') {
         throw new UnauthorizedException('Invalid access token');
+      }
+
+      const user = await this.redisService.get(`user:${payload.email}`);
+
+      if (!user) {
+        const userDb = await this.userService.findOne(payload.email);
+        if (!userDb) {
+          await this.userService.create({
+            email: payload.email,
+            username: payload.username,
+          });
+        }
+        await this.redisService.set(`user:${payload.email}`, userDb);
       }
 
       return {

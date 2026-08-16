@@ -14,13 +14,13 @@ type AuthedRequest = Request & { user?: Payload };
 export class JwtAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthedRequest>();
     const header = request.headers.authorization;
     if (!header?.startsWith('Bearer ')) {
       throw new UnauthorizedException('Missing access token');
     }
-    request.user = this.authService.verifyAccessToken(header.slice(7));
+    request.user = await this.authService.verifyAccessToken(header.slice(7));
     return true;
   }
 }
