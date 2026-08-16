@@ -45,6 +45,9 @@ lerna-debug.log*
 # Keycloak realm public key (do not commit)
 keyauth
 
+# uploaded diary images
+/uploads
+
 # temp directory
 .temp
 .tmp
