@@ -29,11 +29,11 @@ export class AuthService {
       const userId = await this.redisService.get(`user:email:${payload.email}`);
 
       if (!userId) {
-        let userDb = await this.userService.findOne(payload.email);
+        let userDb = await this.userService.findOneByEmail(payload.email);
         if (!userDb) {
           userDb = await this.userService.create({
             email: payload.email,
-            username: payload.username,
+            username: payload.preferred_username,
           });
         }
         await this.redisService.set(`user:email:${payload.email}`, userDb.id);
