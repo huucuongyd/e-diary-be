@@ -26,21 +26,23 @@ export class AuthService {
         throw new UnauthorizedException('Invalid access token');
       }
 
-      const user = await this.redisService.get(`user:${payload.email}`);
+      const userId = await this.redisService.get(`user:email:${payload.email}`);
 
-      if (!user) {
-        const userDb = await this.userService.findOne(payload.email);
+      if (!userId) {
+        let userDb = await this.userService.findOne(payload.email);
         if (!userDb) {
-          await this.userService.create({
+          userDb = await this.userService.create({
             email: payload.email,
             username: payload.username,
           });
         }
-        await this.redisService.set(`user:${payload.email}`, userDb);
+        await this.redisService.set(`user:email:${payload.email}`, userDb.id);
+        await this.redisService.set(`user:id:${userDb.id}`, JSON.stringify(userDb));
       }
 
       return {
         sub: payload.sub,
+        id: userId,
         email: payload.email,
         username: payload.username,
         iat: payload.iat,
