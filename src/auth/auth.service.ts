@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(private readonly config: ConfigService) {}
+
+  verifyAccessToken(token: string): jwt.JwtPayload {
+    try {
+      const payload = jwt.verify(token, this.publicKey, {
+        algorithms: ['RS256'],
+        issuer: `${this.keycloakUrl}/realms/${this.realm}`,
+      });
+
+      if (typeof payload === 'string') {
+        throw new UnauthorizedException('Invalid access token');
+      }
+
+      return payload;
+    } catch {
+      throw new UnauthorizedException('Invalid access token');
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  private get keycloakUrl(): string {
+    return (
+      this.config.get<string>('KEYCLOAK_URL') ?? 'http://localhost:8080'
+    ).replace(/\/$/, '');
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  private get realm(): string {
+    return this.config.get<string>('KEYCLOAK_REALM') ?? 'master';
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  private get publicKey(): string {
+    const keyPath = join(process.cwd(), 'keyauth');
+    if (existsSync(keyPath)) {
+      return toPemPublicKey(readFileSync(keyPath, 'utf8'));
+    }
+    return toPemPublicKey(this.config.get<string>('KEYCLOAK_PUBLIC_KEY') ?? '');
   }
+}
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+export function toPemPublicKey(raw: string): string {
+  const normalized = raw.replace(/\\n/g, '\n').trim();
+  if (!normalized) {
+    throw new UnauthorizedException('Missing Keycloak public key');
   }
+  if (normalized.includes('BEGIN PUBLIC KEY')) {
+    return normalized;
+  }
+  return `-----BEGIN PUBLIC KEY-----\n${normalized}\n-----END PUBLIC KEY-----`;
 }

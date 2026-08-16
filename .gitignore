@@ -42,6 +42,9 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
+# Keycloak realm public key (do not commit)
+keyauth
+
 # temp directory
 .temp
 .tmp
